@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>COP31 Çevre Atölyesi</title>
+<style>
+:root{
+  --bg:#f4f7f5; --surface:#ffffff; --surface-2:#eef4f0; --ink:#13221c; --ink-2:#4a5c54; --line:#d5e2db;
+  --pri:#1f5c4a; --pri-2:#2e7d5b; --pri-ink:#ffffff; --soft:#e3f0e9;
+  --ok:#15803d; --ok-bg:#dcfce7; --ok-line:#86efac;
+  --bad:#b91c1c; --bad-bg:#fee2e2; --bad-line:#fca5a5;
+  --sel:#1d4ed8; --sel-bg:#dbeafe; --warn-bg:#fff7e0; --warn-line:#e7b416;
+  --r:16px; --shadow:0 1px 2px rgba(16,40,30,.06),0 8px 24px rgba(16,40,30,.06);
+  --fs:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1613; --surface:#15201b; --surface-2:#1b2923; --ink:#e8f1ec; --ink-2:#a6b8af; --line:#2b3c34;
+    --pri:#4fb38a; --pri-2:#6cc9a1; --pri-ink:#07140f; --soft:#1d332a;
+    --ok:#4ade80; --ok-bg:#12321f; --ok-line:#2f7d4c; --bad:#f87171; --bad-bg:#3a1717; --bad-line:#8b2b2b;
+    --sel:#93c5fd; --sel-bg:#172a46; --warn-bg:#2e2812; --warn-line:#a8861a; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1613; --surface:#15201b; --surface-2:#1b2923; --ink:#e8f1ec; --ink-2:#a6b8af; --line:#2b3c34;
+  --pri:#4fb38a; --pri-2:#6cc9a1; --pri-ink:#07140f; --soft:#1d332a;
+  --ok:#4ade80; --ok-bg:#12321f; --ok-line:#2f7d4c; --bad:#f87171; --bad-bg:#3a1717; --bad-line:#8b2b2b;
+  --sel:#93c5fd; --sel-bg:#172a46; --warn-bg:#2e2812; --warn-line:#a8861a; --shadow:none;
+}
+*{box-sizing:border-box}
+html{font-size:var(--fs);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Ubuntu,Arial,sans-serif;line-height:1.55;min-height:100vh;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:16px 16px 120px}
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.top-in{max-width:980px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;color:var(--pri);letter-spacing:.2px;font-size:.95rem;margin-right:auto}
+.score-pill{background:var(--soft);color:var(--pri);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.85rem;white-space:nowrap}
+.tool{border:1px solid var(--line);background:var(--surface);border-radius:12px;min-width:44px;height:44px;padding:0 12px;font-weight:700;font-size:.85rem}
+.dots{display:flex;gap:6px;flex-wrap:wrap;padding:12px 0 4px}
+.dot{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:.8rem;color:var(--ink-2)}
+.dot.cur{outline:3px solid var(--pri);outline-offset:1px;color:var(--ink)}
+.dot.ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok)}
+.dot.bad{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad)}
+.bar{height:6px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--pri-2);width:0;transition:width .3s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;margin-top:14px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.badge{font-size:.72rem;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.badge.t{background:var(--soft);color:var(--pri);border-color:transparent}
+.qno{font-size:.8rem;color:var(--ink-2);font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.qtext{font-size:1.15rem;font-weight:600;margin:6px 0 18px;text-wrap:pretty}
+.qtext strong{text-decoration:underline;text-underline-offset:3px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:14px;align-items:flex-start;text-align:left;width:100%;min-height:60px;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:var(--surface);transition:border-color .15s,background .15s,transform .05s}
+.opt:hover:not(:disabled){border-color:var(--pri-2);background:var(--surface-2)}
+.opt:active:not(:disabled){transform:scale(.995)}
+.opt:disabled{cursor:default}
+.opt .k{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:var(--surface-2);color:var(--pri)}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)} .opt.ok .k{background:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)} .opt.bad .k{background:var(--bad);color:#fff}
+.opt.dim{opacity:.6}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tf .opt{justify-content:center;font-weight:800;font-size:1.1rem;min-height:72px;align-items:center}
+.kc{display:flex;gap:10px;flex-wrap:wrap}
+.kc input{flex:1 1 260px;min-height:58px;border-radius:14px;border:2px solid var(--line);background:var(--surface);padding:0 16px;font-size:1.05rem}
+.kc input.ok{border-color:var(--ok);background:var(--ok-bg)} .kc input.bad{border-color:var(--bad);background:var(--bad-bg)}
+.btn{min-height:56px;padding:0 22px;border-radius:14px;border:none;background:var(--pri);color:var(--pri-ink);font-weight:800;font-size:1rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:var(--surface);color:var(--ink);border:2px solid var(--line)}
+.match{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px}
+.col{display:grid;gap:10px;align-content:start}
+.coltitle{font-size:.75rem;font-weight:800;color:var(--ink-2);text-transform:uppercase;letter-spacing:.5px}
+.mi{display:flex;gap:10px;align-items:center;text-align:left;width:100%;min-height:58px;padding:10px 12px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font-size:.92rem}
+.mi .tag{flex:none;min-width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:.8rem;background:var(--surface-2);color:var(--ink-2)}
+.mi.sel{border-color:var(--sel);background:var(--sel-bg)}
+.mi.paired .tag{color:#fff}
+.mi.ok{border-color:var(--ok);background:var(--ok-bg)} .mi.bad{border-color:var(--bad);background:var(--bad-bg)}
+.hint{font-size:.85rem;color:var(--ink-2);margin:12px 0 0}
+.fb{margin-top:18px;border-radius:14px;padding:18px;border:1px solid var(--line);background:var(--surface-2);animation:in .25s ease}
+.fb.ok{border-color:var(--ok-line)} .fb.bad{border-color:var(--bad-line)}
+.fb h3{margin:0 0 8px;font-size:1.05rem}
+.fb.ok h3{color:var(--ok)} .fb.bad h3{color:var(--bad)}
+.fb p{margin:8px 0}
+.fb .lbl{font-weight:800;color:var(--pri)}
+.fb .why{background:var(--warn-bg);border-left:4px solid var(--warn-line);padding:10px 12px;border-radius:8px;margin:10px 0}
+.fb ul{margin:6px 0;padding-left:20px} .fb li{margin:4px 0}
+.fb .kaz{font-size:.85rem;color:var(--ink-2);font-style:italic}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:6}
+.nav-in{max-width:980px;margin:0 auto;display:flex;gap:12px;justify-content:space-between;align-items:center}
+.nav .btn{flex:0 1 220px}
+.navinfo{font-size:.85rem;color:var(--ink-2);text-align:center}
+.hero{text-align:center;padding:28px 8px 8px}
+.hero .kicker{color:var(--pri-2);font-weight:800;font-size:.8rem;letter-spacing:.8px;text-transform:uppercase}
+.hero h1{font-size:2.1rem;line-height:1.15;margin:10px 0;color:var(--pri)}
+.hero p{color:var(--ink-2);max-width:640px;margin:0 auto 6px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:22px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.stat b{display:block;font-size:1.5rem;color:var(--pri)} .stat span{font-size:.78rem;color:var(--ink-2)}
+.rules{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.rules li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.92rem}
+.center{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.big{font-size:3.4rem;font-weight:900;color:var(--pri);line-height:1}
+.ring{width:190px;height:190px;border-radius:50%;margin:10px auto 6px;display:grid;place-items:center;background:conic-gradient(var(--pri-2) calc(var(--p)*1%),var(--line) 0)}
+.ring>div{width:150px;height:150px;border-radius:50%;background:var(--surface);display:grid;place-items:center;text-align:center}
+.ring small{display:block;color:var(--ink-2);font-size:.8rem;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--ink-2);font-size:.75rem;text-transform:uppercase;letter-spacing:.4px}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.themes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.th{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:.86rem}
+.th .m{display:flex;gap:4px;flex:none}
+.th .m button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);font-weight:800;font-size:.8rem}
+.m .ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-line)} .m .bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-line)} .m .na{background:var(--surface);color:var(--ink-2)}
+.msg{font-size:1.05rem;max-width:620px;margin:6px auto 0;text-align:center}
+h2.sec{font-size:1.05rem;margin:0 0 12px;color:var(--pri)}
+.hidden{display:none!important}
+@media (max-width:640px){
+  :root{--fs:16px}
+  .card{padding:16px}
+  .match{grid-template-columns:1fr}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .themes{grid-template-columns:1fr}
+  .hero h1{font-size:1.6rem}
+  .dot{width:34px;height:34px}
+  .nav .btn{flex:1 1 0;padding:0 12px}
+  .navinfo{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">COP31 • Tabiat ve Yaşanabilir Çevre Atölyesi</div>
+    <span class="score-pill" id="pill">0 / 100 puan</span>
+    <button class="tool" id="fsDown" aria-label="Yazıyı küçült">A−</button>
+    <button class="tool" id="fsUp" aria-label="Yazıyı büyüt">A+</button>
+    <button class="tool" id="themeBtn" aria-label="Açık/koyu tema">Tema</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- Giriş -->
+  <section id="start">
+    <div class="hero">
+      <div class="kicker">Bilgi Yarışması Hazırlık Atölyesi</div>
+      <h1>Kasımda Antalya'da toplanacak dünyaya hazır mısınız?</h1>
+      <p>Yirmi soru, on tema. Her cevabın ardından neden doğru ya da yanlış olduğunu birlikte konuşacağız. Acele yok; asıl kazanç, çözümleri okuduğunuz anda geliyor.</p>
+    </div>
+    <div class="grid4">
+      <div class="stat"><b>10</b><span>çoktan seçmeli × 5 puan</span></div>
+      <div class="stat"><b>6</b><span>doğru-yanlış × 4 puan</span></div>
+      <div class="stat"><b>2</b><span>kısa cevaplı × 6 puan</span></div>
+      <div class="stat"><b>2</b><span>eşleştirme × 7 puan</span></div>
+    </div>
+    <ul class="rules">
+      <li>Yanlış cevap doğruyu götürmez. Emin olmasanız da işaretleyin; boş bırakılan soru puan getirmez.</li>
+      <li>Eşleştirmede kısmi puan yok. 7 puan için beş eşleşmenin beşi de doğru olmalı.</li>
+      <li>Kısa cevaplı sorularda tek bir terim, sayı ya da yer adı yazın. Büyük-küçük harf önemli değil.</li>
+      <li>Sorular arasında Önceki ve Sonraki düğmeleriyle ya da üstteki numaralarla serbestçe gezinebilirsiniz. Klavyede ← → tuşları ve 1–4 ya da A–D de çalışır.</li>
+    </ul>
+    <div class="center"><button class="btn" id="go" style="min-width:240px">Atölyeyi başlat</button></div>
+  </section>
+
+  <!-- Soru -->
+  <section id="quiz" class="hidden">
+    <div class="dots" id="dots"></div>
+    <div class="bar"><i id="barFill"></i></div>
+    <article class="card" id="card" aria-live="polite"></article>
+  </section>
+
+  <!-- Sonuç -->
+  <section id="result" class="hidden"></section>
+</main>
+
+<nav class="nav hidden" id="nav">
+  <div class="nav-in">
+    <button class="btn ghost" id="prev">← Önceki</button>
+    <div class="navinfo" id="navinfo"></div>
+    <button class="btn" id="next">Sonraki →</button>
+  </div>
+</nav>
+
+<script>
+const DATA = {"themes": ["İklim Değişikliği ve Küresel İklim Politikaları", "Enerji Dönüşümü ve Yenilenebilir Enerji", "İklim Finansmanı ve Yeşil Ekonomi", "İklim Değişikliğine Uyum ve Dayanıklı Topluluklar", "Doğa Tabanlı Çözümler ve Biyoçeşitlilik", "Sürdürülebilir Şehirler ve Yerel İklim Eylemi", "Döngüsel Ekonomi ve Atık Yönetimi", "Tarım, Gıda Sistemleri ve İklim Değişikliği", "Su Ekosistemleri ve İklim Riskleri", "Turizm, Kültürel Miras ve İklim Değişikliği"], "questions": [{"no": 1, "theme": 1, "themeName": "İklim Değişikliği ve Küresel İklim Politikaları", "type": "MC", "points": 5, "level": "Analiz", "q": "Türkiye, İkinci Ulusal Katkı Beyanı'nda (NDC 3.0) 2035 yılı emisyonlarını 643 milyon ton CO₂ eşdeğeri ile sınırlandırmayı ve böylece referans senaryoya göre 466 milyon ton azaltım sağlamayı taahhüt etmiştir. Bu bilgilerden hangi çıkarım yapılabilir?", "options": ["466 milyon ton, Türkiye'nin 2035'te salabileceği en yüksek emisyon miktarıdır.", "Referans senaryoda 2035 emisyonunun yaklaşık 1.109 milyon ton olacağı öngörülmektedir.", "Türkiye, 2035'te emisyonlarını bugünkü seviyesinin yarısına indirecektir.", "Hedef, 2035 emisyonlarının 2022 seviyesinin altına inmesini zorunlu kılar."], "answer": 1, "distractors": {"A": "Karıştırılan iki sayı: 466 azaltım miktarıdır, üst sınır 643'tür.", "C": "Metinde bugünkü emisyonla kıyaslama yok; hedef referans senaryoya göre tanımlanmış.", "D": "643 milyon ton, 2022 emisyonlarının (yaklaşık 560 Mt) üzerindedir; yani hedef mutlak bir düşüş öngörmüyor."}, "sol": "Burada küçük bir toplama yapmak yeterli: 643 + 466 = 1.109. Referans senaryo, hiçbir ek önlem alınmazsa 2035'te ulaşılacağı tahmin edilen emisyondur ve Türkiye'nin taahhüdü bu tahmin üzerinden hesaplanıyor. Sınavda bu üç sayıyı (1.109, 643, 466) yan yana gördüğünüzde hangisinin tavan, hangisinin azaltım olduğunu sorun kendinize.", "link": "Paris Anlaşması her ülkeye hedefini kendisi belirleme serbestliği tanır; NDC'lerin bir kısmının referans senaryoya, bir kısmının sabit bir baz yıla göre yazılmasının nedeni budur.", "kaz": "Ulusal katkı beyanındaki sayısal hedefleri yorumlar ve aralarındaki ilişkiyi hesaplar."}, {"no": 2, "theme": 1, "themeName": "İklim Değişikliği ve Küresel İklim Politikaları", "type": "DY", "points": 4, "level": "Kavrama", "q": "Kyoto Protokolü de Paris Anlaşması gibi tüm taraf ülkelerden ulusal katkı beyanı sunmalarını istemiştir.", "ans": false, "sol": "Yanlış. Kyoto Protokolü (1997) bağlayıcı azaltım hedefini yalnızca gelişmiş ülkelere, yani Ek-B listesindekilere yükledi; gelişmekte olan ülkelerin sayısal bir yükümlülüğü yoktu. Paris Anlaşması (2015) ise ilk kez her tarafın kendi katkı beyanını hazırlamasını ve bunu beş yılda bir güncellemesini istedi. Sınavda bu fark çok sık karşınıza çıkar.", "link": "Türkiye'nin 2009'da Kyoto'ya taraf olup sayısal hedef almaması, 2021'de Paris'i onaylayınca NDC sunmaya başlaması bu farkın somut örneğidir.", "kaz": "Kyoto Protokolü ile Paris Anlaşması'nı yükümlülük yapısı açısından karşılaştırır."}, {"no": 3, "theme": 2, "themeName": "Enerji Dönüşümü ve Yenilenebilir Enerji", "type": "MC", "points": 5, "level": "Uygulama", "q": "COP31 Başkanlığı'nın 2035 hedeflerinden biri, binalarda enerji kullanım yoğunluğunu (metrekare başına tüketilen enerji) en az %25 azaltmaktır. Aşağıdaki uygulamalardan hangisi bu hedefe doğrudan katkı sağlar?", "options": ["Bina çatılarına güneş paneli kurulup üretilen elektriğin şebekeye satılması", "Kömür santrali yerine doğal gaz santrali kurulması", "Şehirlerarası otoyol ağının genişletilmesi", "Mevcut binalara dış cephe yalıtımı yapılması ve eski kazanların ısı pompasıyla değiştirilmesi"], "answer": 3, "distractors": {"A": "En güçlü çeldirici bu. Güneş paneli elektriği temizler ama binanın tükettiği enerjiyi azaltmaz; tüketim aynı kalır.", "B": "Santral tercihi elektrik üretimini ilgilendirir; binanın ne kadar enerji harcadığını değiştirmez.", "C": "Ulaştırma sektörüne ait bir karar; bina enerjisiyle ilgisi yok."}, "sol": "Anahtar kelime 'yoğunluk'. Hedef, binanın ihtiyaç duyduğu enerjiyi azaltmak. Yalıtım ısı kaybını azaltır, ısı pompası da aynı ısıyı çok daha az enerjiyle üretir; ikisi birlikte metrekare başına tüketimi düşürür. Güneş paneli ise aynı tüketimi yenilenebilir kaynakla karşılar. Bu iki stratejiye 'verimlilik' ve 'temiz üretim' diyebiliriz.", "link": "Binalarda verimlilik hem azaltım hem uyum aracıdır: iyi yalıtılmış bir ev sıcak hava dalgalarında da daha serin kalır (Tema 4).", "kaz": "Enerji verimliliği ile yenilenebilir enerji üretimini ayırt eder."}, {"no": 4, "theme": 2, "themeName": "Enerji Dönüşümü ve Yenilenebilir Enerji", "type": "KC", "points": 6, "level": "Bilgi", "q": "Enerji ve Tabii Kaynaklar Bakanlığı'nın hedefine göre Türkiye, 2035 yılında güneş ve rüzgâr santrallerinde toplam kaç megavat (MW) kurulu güce ulaşmayı amaçlamaktadır?", "ans": "120.000 MW", "accept": ["120000", "120.000", "120000 mw", "120.000 mw", "120 bin", "120 bin mw", "120 gw", "120 gigavat", "120bin"], "acceptShow": "120.000 MW; 120000; 120 bin MW; 120 GW (120 gigavat)", "sol": "Cevap 120.000 MW, yani 120 gigavat. Bu rakamın yalnızca güneş ve rüzgâra ait olduğunu unutmayın; bazı kaynaklar onu 'tüm yenilenebilirlerin hedefi' gibi aktarıyor. Ağustos 2026 itibarıyla güneş ve rüzgârın toplam kurulu gücü 43.348 MW. Hedefe ulaşmak için bu kapasitenin yaklaşık üç katına çıkması gerekiyor.", "link": "COP28'de kabul edilen 'yenilenebilir kapasiteyi 2030'a kadar üç katına çıkarma' hedefiyle aynı ölçekte bir büyüme.", "kaz": "Türkiye'nin orta vadeli enerji dönüşümü hedefini bilir."}, {"no": 5, "theme": 3, "themeName": "İklim Finansmanı ve Yeşil Ekonomi", "type": "MC", "points": 5, "level": "Analiz", "q": "AB'ye çelik ihraç eden bir Türk firması için Sınırda Karbon Düzenleme Mekanizması'nın (SKDM/CBAM) mali yükünü en çok azaltacak strateji hangisidir?", "options": ["Ton başına gömülü emisyonu düşürmek ve Türkiye'de ödediği karbon bedelini belgelemek", "Ürünlerini AB pazarında daha düşük fiyatla satmak", "İhracat hacmini artırarak birim maliyeti düşürmek", "Ürün ambalajlarında 'çevre dostu' ifadesine yer veren bir reklam kampanyası yapmak"], "answer": 0, "distractors": {"B": "Satış fiyatı SKDM yükümlülüğünü değiştirmez; bedel ürünün içerdiği emisyona göre hesaplanır.", "C": "Daha çok ihracat, daha çok SKDM sertifikası demektir; yük artar.", "D": "Belgesiz çevre iddiası yeşil aklamadır; SKDM'de hiçbir indirime yol açmaz."}, "sol": "SKDM bir 'karbon gümrüğü' gibi çalışır: AB'ye giren her ton çeliğin üretiminde salınan emisyon kadar sertifika alınması gerekir. Yükü azaltmanın iki yolu vardır. Birincisi üretimde emisyonu düşürmektir. İkincisi, üretimin yapıldığı ülkede zaten ödenmiş bir karbon fiyatı varsa onu belgelemektir, çünkü bu tutar SKDM bedelinden düşülebilir. Türkiye'nin kendi Emisyon Ticaret Sistemi'ni (TR ETS) kurması bu yüzden ihracatçılar açısından önemlidir: ödenen karbon bedeli yurt içinde kalır.", "link": "7552 sayılı İklim Kanunu'nun hazırlanma gerekçelerinden biri de AB ile ticarette SKDM'ye uyum sağlamaktı (Tema 1 ve 3'ün kesiştiği nokta).", "kaz": "Uluslararası karbon düzenlemelerinin Türkiye ekonomisine etkisini değerlendirir ve çözüm önerir."}, {"no": 6, "theme": 3, "themeName": "İklim Finansmanı ve Yeşil Ekonomi", "type": "ES", "points": 7, "level": "Kavrama", "q": "Aşağıdaki iklim finansmanı kavramlarını doğru açıklamalarıyla eşleştiriniz.", "items": [["Yeşil tahvil", "Geliri yalnızca çevre dostu projelerin finansmanında kullanılan borçlanma aracı"], ["TR ETS", "Tavan ve ticaret ilkesiyle işleyen ulusal karbon piyasası"], ["EPİAŞ", "Türkiye Emisyon Ticaret Sistemi'nin piyasa işletmecisi"], ["7552 sayılı Kanun", "9 Temmuz 2025'te yürürlüğe giren, Türkiye'nin ilk iklim kanunu"], ["Kayıp ve Zarar Fonu", "Kaçınılamayan iklim etkilerinden zarar gören kırılgan ülkeleri destekleyen fon"]], "right": ["9 Temmuz 2025'te yürürlüğe giren, Türkiye'nin ilk iklim kanunu", "Geliri yalnızca çevre dostu projelerin finansmanında kullanılan borçlanma aracı", "Kaçınılamayan iklim etkilerinden zarar gören kırılgan ülkeleri destekleyen fon", "Türkiye Emisyon Ticaret Sistemi'nin piyasa işletmecisi", "Tavan ve ticaret ilkesiyle işleyen ulusal karbon piyasası"], "key": {"1": "b", "2": "e", "3": "d", "4": "a", "5": "c"}, "sol": "Beş eşleşmenin beşi de doğru olmadıkça 7 puan alınamıyor, o yüzden önce en emin olduklarınızdan başlayın. EPİAŞ ile TR ETS'yi ayırmanın kolay yolu: biri piyasanın kendisi, diğeri o piyasayı işleten şirket. Kayıp ve Zarar Fonu COP27'de kuruldu, COP28'de işler hâle geldi. Yeşil tahvilde ölçüt, paranın nereye harcandığıdır.", "link": "Bu beş kavramın üçü ulusal (TR ETS, EPİAŞ, 7552), ikisi küresel ölçekte (yeşil tahvil piyasası, Kayıp ve Zarar Fonu). COP31'de finans müzakereleri tam da bu iki ölçeğin buluştuğu yerde yapılacak.", "kaz": "İklim finansmanı araçlarını ve kurumlarını işlevleriyle ilişkilendirir."}, {"no": 7, "theme": 4, "themeName": "İklim Değişikliğine Uyum ve Dayanıklı Topluluklar", "type": "MC", "points": 5, "level": "Analiz", "q": "Kıyıda yer alan bir belediye üç proje planlıyor: (I) Dere yatağındaki yapıları kaldırıp taşkın parkı yapmak, (II) Otobüs filosunu elektrikli araçlara dönüştürmek, (III) Sıcak hava dalgalarına karşı SMS tabanlı erken uyarı sistemi kurmak. Bu projelerin sınıflandırılması hangisinde doğru verilmiştir?", "options": ["I azaltım, II ve III uyum", "Üçü de azaltım", "I ve III uyum, II azaltım", "I uyum, II ve III azaltım"], "answer": 2, "distractors": {"A": "Taşkın parkı sera gazını azaltmaz; selin zararını azaltır.", "B": "Erken uyarı sistemi emisyona dokunmaz; insanları etkiye karşı korur.", "D": "Erken uyarı sistemi azaltım değil, tipik bir uyum aracıdır."}, "sol": "Her projeye tek bir soru sorun: 'Bu, gazı mı azaltıyor, yoksa etkiden mi koruyor?' Elektrikli otobüs egzozdan çıkan emisyonu azaltır, bu azaltımdır. Taşkın parkı ve erken uyarı ise sel ile sıcaklık zaten yaşanırken zararı küçültür, bunlar uyumdur. Taşkın parkının yeşil alan olarak biraz karbon da tutabileceğini düşünebilirsiniz, ancak projenin amacı ve asıl işlevi taşkın korumasıdır.", "link": "Aynı projede iki politika birleşebilir: kent ormanı hem karbon tutar (azaltım) hem ısı adasını serinletir (uyum). Tema 5 ve 6'da bu kesişimi tekrar göreceksiniz.", "kaz": "Uyum ve azaltım eylemlerini gerekçesiyle sınıflandırır."}, {"no": 8, "theme": 4, "themeName": "İklim Değişikliğine Uyum ve Dayanıklı Topluluklar", "type": "DY", "points": 4, "level": "Kavrama", "q": "Dirençlilik, bir toplumun afet sonrasında işlevlerini hızla geri kazanabilme kapasitesidir; kırılganlık arttıkça bu kapasite azalır.", "ans": true, "sol": "Doğru. Kırılganlık, zarar görmeye ne kadar yatkın olduğumuzu, dirençlilik ise darbeden sonra ne kadar çabuk ayağa kalktığımızı anlatır. Biri yükselirken diğeri düşer. Sağlam altyapı, sigorta, erken uyarı ve dayanışma ağları kırılganlığı azaltarak dirençliliği artırır.", "link": "Tarım sigortası TARSİM, kuraklık veya dolu sonrası çiftçinin yeniden üretime dönmesini sağlayan bir dirençlilik aracıdır (Tema 8).", "kaz": "Dirençlilik ve kırılganlık kavramları arasındaki ilişkiyi açıklar."}, {"no": 9, "theme": 5, "themeName": "Doğa Tabanlı Çözümler ve Biyoçeşitlilik", "type": "MC", "points": 5, "level": "Kavrama", "q": "Akdeniz'e özgü deniz çayırı Posidonia oceanica alanlarının tekne çapaları ve kıyı dolgularıyla tahrip edilmesinin iklim açısından en doğrudan sonucu hangisidir?", "options": ["Ozon tabakasının incelmesi", "Deniz suyunun tatlılaşması", "Kıyılarda deniz seviyesinin düşmesi", "Deniz tabanındaki çökellerde depolanmış karbonun açığa çıkabilmesi ve mavi karbon yutağının zayıflaması"], "answer": 3, "distractors": {"A": "Ozon incelmesinin nedeni CFC gibi gazlardır; deniz çayırlarıyla bağlantısı yok.", "B": "Tuzluluk akarsu girişi ve buharlaşmayla ilgilidir, deniz çayırıyla değil.", "C": "Tersine, çayırlar kaybolunca kıyı erozyonu artar; deniz seviyesi düşmez."}, "sol": "Posidonia çayırları yüzyıllar boyunca köklerinin altında kalın bir organik katman biriktirir. Bu katmanda depolanan karbona 'mavi karbon' denir; mangrov ve tuzlu bataklıklar da aynı gruptadır. Çayır sökülünce bu karbon yeniden suya ve atmosfere karışabilir. Yani zarar iki yönlüdür: yeni karbon tutulamaz, eski depo da boşalır.", "link": "Deniz çayırları dalga enerjisini kırarak kumsalları korur. Bu yüzden onları korumak hem bir doğa tabanlı çözüm hem kıyı turizmi için bir uyum önlemidir (Tema 10).", "kaz": "Kıyı ekosistemlerinin karbon döngüsündeki rolünü açıklar."}, {"no": 10, "theme": 5, "themeName": "Doğa Tabanlı Çözümler ve Biyoçeşitlilik", "type": "DY", "points": 4, "level": "Değerlendirme", "q": "Bozulmuş bir orman alanının restorasyonunda, en hızlı büyüdüğü için yerli olmayan tek bir ağaç türünün dikilmesi biyoçeşitlilik açısından en iyi uygulamadır.", "ans": false, "sol": "Yanlış. Tek türden oluşan bir ağaçlık (monokültür) hızlı yeşerse de böcek, kuş ve mantar çeşitliliğine yaşam alanı sunmaz; hastalık ve yangın karşısında da daha savunmasızdır. Yerli olmayan tür istilacı hâle gelirse yerel türleri baskılayabilir. Restorasyonda doğru yaklaşım, alanın kendi yerli türlerini karışık olarak kullanmaktır.", "link": "BM, 2021–2030 dönemini Ekosistem Restorasyonu On Yılı ilan etti. Kunming-Montreal Çerçevesi de bozulmuş alanların en az %30'unun restore edilmesini hedefliyor.", "kaz": "Ekosistem restorasyonu uygulamalarını biyoçeşitlilik ölçütüyle değerlendirir."}, {"no": 11, "theme": 6, "themeName": "Sürdürülebilir Şehirler ve Yerel İklim Eylemi", "type": "MC", "points": 5, "level": "Analiz", "q": "Bir yaz gecesi aynı şehirde yapılan ölçümlerde sıcaklık; beton ve asfaltın yoğun olduğu merkezde 31°C, ağaçlık bir parkın çevresinde 27°C, şehir dışındaki tarlalarda 25°C olarak ölçülmüştür. Bu verilerle ilgili en doğru yorum hangisidir?", "options": ["Aradaki sıcaklık farkı yalnızca yükselti farkından kaynaklanır.", "Geçirimsiz yüzeyler gündüz depoladığı ısıyı gece saldığı için merkez daha sıcaktır; yeşil alanlar bu etkiyi azaltmaktadır.", "Park çevresinin kırsaldan sıcak olması, parkların sera gazı salımını artırdığını gösterir.", "Kırsalın daha serin olması termal inversiyonun kanıtıdır."], "answer": 1, "distractors": {"A": "Ölçümler aynı şehirde yapıldı ve soruda yükselti bilgisi yok. Fark, yüzey türüyle açıklanıyor.", "C": "Park, merkezden 4°C daha serin; ağaçlar gölge ve terleme yoluyla serinletir. Kırsaldan biraz sıcak olması çevresindeki kentin etkisidir.", "D": "Termal inversiyon, sıcaklığın yükseklikle artmasıdır; yatay bir kent–kır farkını açıklamaz."}, "sol": "Bu tablo, kentsel ısı adasının ders kitabı örneği. Asfalt ve beton gündüz Güneş'i emer, gece yavaşça geri verir; bu yüzden fark özellikle geceleri belirginleşir. Parkın 27°C ölçülmesi çözümün de ipucunu veriyor: ağaçlandırma, yeşil çatı ve açık renkli yüzeyler merkezi birkaç derece serinletebilir.", "link": "Sıcak gecelerde serinleyemeyen vücut sıcak çarpmasına daha açık olur. Isı adasıyla mücadele bu yüzden bir halk sağlığı uyumudur da (Tema 4).", "kaz": "Kentsel ısı adası verilerini yorumlar ve doğa tabanlı çözümlerle ilişkilendirir."}, {"no": 12, "theme": 6, "themeName": "Sürdürülebilir Şehirler ve Yerel İklim Eylemi", "type": "DY", "points": 4, "level": "Bilgi", "q": "4 Ağustos 2026'da yayımlanan yönetmeliğe göre yerel iklim değişikliği eylem planları, İl İklim Değişikliği Koordinasyon Kurulu tarafından karara bağlanır ve beş yılda bir güncellenir.", "ans": true, "sol": "Doğru. Planlar 81 ilde, vali koordinasyonunda belediyeler ve diğer kurumların katılımıyla hazırlanıyor. İl İklim Değişikliği Koordinasyon Kurulu planı karara bağlıyor, uygulama her yıl izlenip raporlanıyor ve plan beş yılda bir güncelleniyor. Yasal dayanak 7552 sayılı İklim Kanunu.", "link": "Ulusal hedef (NDC) ile mahalledeki bisiklet yolu arasındaki köprü bu planlar. COP31 Eylem Gündemi'ndeki 'dirençli şehirler' başlığının yerel karşılığı da bunlar.", "kaz": "Yerel iklim eyleminin yasal ve kurumsal çerçevesini açıklar."}, {"no": 13, "theme": 7, "themeName": "Döngüsel Ekonomi ve Atık Yönetimi", "type": "MC", "points": 5, "level": "Uygulama", "q": "Bir okul kantininde plastik su şişesi atığıyla ilgili üç öneri sunulmuştur: (I) Şişeleri ayrı toplayıp geri dönüşüme göndermek, (II) Su sebili kurup öğrencilerin matara kullanmasını sağlamak, (III) Toplanan şişeleri yakarak enerji elde etmek. Atık yönetim hiyerarşisine göre en öncelikliden en aza doğru sıralama hangisidir?", "options": ["I – II – III", "III – I – II", "II – I – III", "I – III – II"], "answer": 2, "distractors": {"A": "Geri dönüşüm iyidir ama atık zaten oluştuktan sonra devreye girer; önleme ondan önce gelir.", "B": "Yakma (enerji geri kazanımı) hiyerarşinin alt basamaklarındadır; ilk tercih olamaz.", "D": "Geri dönüşüm yakmadan öncelikli olduğu için doğru, ama önleme yine en başta olmalı."}, "sol": "Hiyerarşinin mantığı basit: en iyi atık, hiç oluşmayan atıktır. Su sebili ve matara şişe atığını kaynağında önler (II). Oluşan şişeyi yeniden hammaddeye çevirmek ikinci sırada gelir (I). Yakmak ise malzemeyi yok eder, karşılığında yalnızca enerji alınır (III). Öğrenci Kılavuzu'ndaki 3R kuralının ilk adımının 'azalt' olması da aynı fikre dayanır.", "link": "COP31 Başkanlığı 2035'e kadar atık üretimindeki artışın yarı yarıya azaltılmasını hedefliyor; bu, hiyerarşinin en üst basamağına yapılan bir vurgu.", "kaz": "Atık yönetim hiyerarşisini gerçek bir duruma uygular."}, {"no": 14, "theme": 7, "themeName": "Döngüsel Ekonomi ve Atık Yönetimi", "type": "DY", "points": 4, "level": "Bilgi", "q": "Sıfır Atık Hareketi'nin 2023 yılı için belirlediği %35 geri kazanım hedefine ulaşılmış olup 2035 yılı için yeni hedef %60'tır.", "ans": true, "sol": "Doğru. Hareket 2017'de başladığında geri kazanım oranı yaklaşık %13'tü. 2023 için konan %35 hedefi aşıldı ve oran 2026'da %37'nin üzerine çıktı. Yeni hedef 2035 için %60. Bazı kaynaklarda %35 hâlâ 'güncel hedef' diye geçiyor; o bilgi eskidi.", "link": "Uluslararası Sıfır Atık Günü (30 Mart), Türkiye'nin önerisiyle 2022'de BM Genel Kurulu kararıyla ilan edildi.", "kaz": "Sıfır Atık Hareketi'nin hedeflerini ve gelinen noktayı verilerle değerlendirir."}, {"no": 15, "theme": 8, "themeName": "Tarım, Gıda Sistemleri ve İklim Değişikliği", "type": "MC", "points": 5, "level": "Kavrama", "q": "Tarımsal faaliyetler ile bu faaliyetlerin başlıca sera gazı salımı arasında yapılan eşleştirmelerden hangisi **yanlıştır**?", "options": ["Sentetik azotlu gübre kullanımı – Metan (CH₄)", "Geviş getiren hayvanların sindirimi – Metan (CH₄)", "Su altında yetiştirilen çeltik – Metan (CH₄)", "Azotlu gübrenin topraktaki dönüşümü – Diazot monoksit (N₂O)"], "answer": 0, "distractors": {"B": "Doğru eşleşme: işkembedeki fermantasyon metan üretir.", "C": "Doğru eşleşme: su altında kalan tarlada oksijensiz ayrışma metan üretir.", "D": "Doğru eşleşme: azotlu gübrenin toprakta dönüşmesi N₂O açığa çıkarır."}, "sol": "Formüle bakmak yeterli: gübre azot (N) içerir, bu yüzden salımı da azotlu bir gaz olan diazot monoksittir (N₂O). Metan ise oksijensiz ortamda organik maddenin ayrışmasıyla oluşur: inek midesi, su altındaki çeltik tarlası, çöplükte çürüyen gıda. N₂O, 100 yıllık ölçekte CO₂'den yaklaşık 270 kat güçlü bir sera gazıdır.", "link": "Çöpe giden gıda da metan üretir (Tema 7). Gıda israfını azaltmak bu yüzden hem atık hem tarım politikasıdır.", "kaz": "Tarımsal sera gazı kaynaklarını kimyasal temeliyle ayırt eder."}, {"no": 16, "theme": 8, "themeName": "Tarım, Gıda Sistemleri ve İklim Değişikliği", "type": "MC", "points": 5, "level": "Değerlendirme", "q": "Konya Ovası'nda yeraltı suyu seviyesi her yıl düşen bir çiftçiye, verimini koruyarak su tüketimini en çok azaltacak öneri hangisidir?", "options": ["Daha derin bir kuyu açarak su sıkıntısını gidermek", "Toprak nem sensörleriyle desteklenen damla sulamaya geçip yalnızca bitkinin ihtiyaç duyduğu anda sulamak", "Salma sulamaya devam edip sulamayı yalnızca geceleri yapmak", "Su ihtiyacı daha yüksek ama daha kârlı bir ürüne geçmek"], "answer": 1, "distractors": {"A": "Sorunu ertelemekle kalmaz, büyütür: yeraltı suyu daha hızlı düşer, obruk riski artar.", "C": "Gece sulamak buharlaşmayı biraz azaltır, ama salma sulamanın sızma kaybı aynen sürer.", "D": "Su stresi yaşanan havzada su isteği yüksek ürün, tüketimi artırır."}, "sol": "Bu bir 'en iyi' sorusu, bu yüzden kısmen doğru seçenekleri de tartmak gerekiyor. Damla sulama suyu doğrudan köke verir, kaybı en aza indirir. Sensörler ise ne zaman ve ne kadar sulanacağını tahmine değil ölçüme dayandırır; akıllı tarım budur. Gece sulama küçük bir iyileştirme olsa da asıl kayıp kaynağı olan yöntemi değiştirmez.", "link": "Türkiye'de kullanılan suyun yaklaşık dörtte üçü tarımsal sulamaya gidiyor. Sulamadaki küçük bir verimlilik artışı, şehirlerin toplam su tüketiminden daha fazla su kazandırabilir (Tema 9).", "kaz": "Kuraklık koşullarında sürdürülebilir tarım çözümlerini değerlendirir."}, {"no": 17, "theme": 9, "themeName": "Su Ekosistemleri ve İklim Riskleri", "type": "MC", "points": 5, "level": "Uygulama", "q": "Bir pamuklu tişörtün üretiminde (I) pamuk tarlasında yağmur suyuyla karşılanan su, (II) sulama için kuyudan çekilen su ve (III) boyahanede kirlenen suyu standartlara uygun hâle getirmek için gereken temiz su kullanılmıştır. Bunlar sırasıyla su ayak izinin hangi bileşenleridir?", "options": ["Mavi – Yeşil – Gri", "Gri – Mavi – Yeşil", "Yeşil – Gri – Mavi", "Yeşil – Mavi – Gri"], "answer": 3, "distractors": {"A": "Kuyu ve baraj suyu mavidir, yağmur suyu yeşildir; ilk ikisi yer değiştirmiş.", "B": "Gri su kirliliği seyreltmek için gereken sudur, yağmur suyu değil.", "C": "Kuyudan çekilen su mavidir; gri bileşen kirlilikle ilgilidir."}, "sol": "Renkleri doğadaki yerleriyle hatırlayın. Yeşil su toprakta tutulan yağmur suyudur, bitki onu doğrudan kullanır. Mavi su göl, akarsu ve kuyudan çekilip taşınan sudur. Gri su ise kirlenen suyu temizlemek ya da seyreltmek için gereken tatlı su miktarıdır. Bir tişört için hesaplanan yaklaşık 2.700 litrenin büyük kısmı pamuk tarlasında harcanır.", "link": "Ürünlerin içine 'gizlenen' bu suya sanal su da denir. Su kıtlığı yaşayan bir ülkenin çok su isteyen ürünleri ithal etmesi, aslında su ithal etmesi demektir.", "kaz": "Su ayak izinin bileşenlerini gerçek bir üretim zinciri üzerinde ayırt eder."}, {"no": 18, "theme": 9, "themeName": "Su Ekosistemleri ve İklim Riskleri", "type": "ES", "points": 7, "level": "Bilgi", "q": "Sulak alanların korunmasıyla ilgili aşağıdaki kavramları ve alanları doğru açıklamalarıyla eşleştiriniz.", "items": [["Ramsar Sözleşmesi", "1971'de İran'da imzalanan, uluslararası öneme sahip sulak alanları koruyan sözleşme"], ["SAYBİS", "Sulak alanların kaydını tutan ve izin başvurularını e-Devlet üzerinden alan Ulusal Sulak Alan Yönetim Bilgi Sistemi"], ["Meke Gölü", "Konya'da, volkanik patlamayla oluşmuş ve 'Dünyanın nazar boncuğu' diye anılan maar gölü"], ["Sultan Sazlığı", "Kayseri'de, tatlı ve tuzlu su ekosistemlerini aynı havzada barındıran kuş cenneti"], ["Nemrut Kalderası", "Bitlis'te, 2013'te listeye girerek Türkiye'nin 14. Ramsar alanı olan krater"]], "right": ["Konya'da, volkanik patlamayla oluşmuş ve 'Dünyanın nazar boncuğu' diye anılan maar gölü", "Bitlis'te, 2013'te listeye girerek Türkiye'nin 14. Ramsar alanı olan krater", "1971'de İran'da imzalanan, uluslararası öneme sahip sulak alanları koruyan sözleşme", "Kayseri'de, tatlı ve tuzlu su ekosistemlerini aynı havzada barındıran kuş cenneti", "Sulak alanların kaydını tutan ve izin başvurularını e-Devlet üzerinden alan Ulusal Sulak Alan Yönetim Bilgi Sistemi"], "key": {"1": "c", "2": "e", "3": "a", "4": "d", "5": "b"}, "sol": "Bu soruda yer bilgileri işinizi kolaylaştırır: volkanik maar Konya'da, kaldera Bitlis'te, tatlı ve tuzlu suyun buluştuğu sazlık Kayseri'de. SAYBİS'i Doğa Koruma ve Milli Parklar Genel Müdürlüğü yürütür; sistemde 6 binden fazla sulak alan kayıtlıdır. Türkiye 1994'te Ramsar'a taraf oldu ve bugün 14 Ramsar alanına sahip.", "link": "2026 Dünya Sulak Alanlar Günü'nün (2 Şubat) teması sulak alanlar ve kültürel miras üzerineydi. Bu tema, Tema 9 ile Tema 10'u doğrudan birbirine bağlıyor.", "kaz": "Türkiye'deki sulak alan koruma araçlarını ve Ramsar alanlarını özellikleriyle ilişkilendirir."}, {"no": 19, "theme": 10, "themeName": "Turizm, Kültürel Miras ve İklim Değişikliği", "type": "DY", "points": 4, "level": "Değerlendirme", "q": "Bir ekoturizm alanında başarının temel ölçütü, alana gelen ziyaretçi sayısının olabildiğince artırılmasıdır.", "ans": false, "sol": "Yanlış. Ekoturizm doğayı korumayı, yerel halka fayda sağlamayı ve ziyaretçiyi bilinçlendirmeyi hedefler. Her alanın bir taşıma kapasitesi, yani ekosistemi bozmadan kaldırabileceği bir ziyaretçi sınırı vardır. Bu sınır aşıldığında patikalar aşınır, yaban hayatı uzaklaşır, atık ve su sorunu büyür. Ölçüt kalabalık değil, alanın uzun vadede korunmasıdır.", "link": "Aşırı turizm, iklim değişikliğinin yarattığı kuraklık ve yangın riskiyle birleştiğinde kıyı ve dağ alanlarındaki baskı katlanarak artar.", "kaz": "Ekoturizmin ilkelerini taşıma kapasitesi kavramıyla değerlendirir."}, {"no": 20, "theme": 10, "themeName": "Turizm, Kültürel Miras ve İklim Değişikliği", "type": "KC", "points": 6, "level": "Bilgi", "q": "UNESCO Dünya Mirası Listesi'nde Türkiye'den hem doğal hem kültürel (karma) miras olarak yer alan ve peribacalarıyla tanınan alan hangisidir?", "ans": "Göreme Millî Parkı ve Kapadokya", "accept": ["kapadokya", "göreme", "göreme milli parkı", "göreme millî parkı", "göreme milli parkı ve kapadokya", "göreme millî parkı ve kapadokya", "kapadokya göreme", "goreme", "kapadokya bölgesi"], "acceptShow": "Kapadokya; Göreme; Göreme Millî Parkı; Göreme Millî Parkı ve Kapadokya", "sol": "Cevap Göreme Millî Parkı ve Kapadokya (1985). Türkiye'nin 22 Dünya Mirası alanından yalnızca ikisi karma mirastır; diğeri Hierapolis-Pamukkale'dir (1988). Peribacalarını aşındıran yağış ve don-çözülme döngüleri, iklim değişikliğiyle sıklaşan aşırı olaylar nedeniyle bu alan için önemli bir risk.", "link": "Kapadokya hem jeolojik miras hem kaya oyma kiliseler gibi kültürel miras barındırır. İklim riskleri bu iki mirası aynı anda etkiler.", "kaz": "Türkiye'nin UNESCO karma miras alanlarını tanır."}]};
+(function(){
+  "use strict";
+  const Q = DATA.questions, L = ["A","B","C","D"], TN = {MC:"Çoktan seçmeli", DY:"Doğru-yanlış", KC:"Kısa cevaplı", ES:"Eşleştirme"};
+  const PAIR_COLORS = ["#2563eb","#9333ea","#d97706","#0891b2","#db2777"];
+  const $ = (s) => document.querySelector(s);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  let state, cur = 0;
+
+  function fresh(){ return Q.map(q => ({done:false, correct:false, pts:0, pick:null, text:"", pairs:{}, selLeft:null})); }
+
+  // Türkçe uyumlu normalleştirme (kısa cevap)
+  function norm(s){
+    return String(s).toLocaleLowerCase("tr-TR").normalize("NFKD").replace(/[̂]/g,"").normalize("NFC")
+      .replace(/[îâû]/g, c => ({"î":"i","â":"a","û":"u"}[c])).replace(/[.,;:!?'"’()\-]/g,"").replace(/\s+/g," ").trim();
+  }
+  const squash = (s) => norm(s).replace(/\s/g,"");
+
+  function richText(node, text){
+    String(text).split("**").forEach((part, i) => { if (!part) return; if (i % 2) node.appendChild(el("strong", null, part)); else node.appendChild(document.createTextNode(part)); });
+  }
+
+  function score(){ return state.reduce((a, s) => a + s.pts, 0); }
+
+  function renderDots(){
+    const d = $("#dots"); d.innerHTML = "";
+    Q.forEach((q, i) => {
+      const b = el("button", "dot" + (i === cur ? " cur" : "") + (state[i].done ? (state[i].correct ? " ok" : " bad") : ""), String(i + 1));
+      b.setAttribute("aria-label", `Soru ${i + 1}` + (state[i].done ? (state[i].correct ? ", doğru" : ", yanlış") : ""));
+      b.onclick = () => go(i); d.appendChild(b);
+    });
+    const answered = state.filter(s => s.done).length;
+    $("#barFill").style.width = (answered / Q.length * 100) + "%";
+    $("#pill").textContent = `${score()} / 100 puan`;
+    $("#navinfo").textContent = `${answered} / ${Q.length} soru cevaplandı`;
+    $("#prev").disabled = cur === 0;
+    $("#next").textContent = cur === Q.length - 1 ? "Sonuçları gör" : "Sonraki →";
+  }
+
+  function finish(i, correct){
+    const s = state[i]; s.done = true; s.correct = correct; s.pts = correct ? Q[i].points : 0;
+    renderQuestion(); renderDots();
+  }
+
+  function feedback(q, s){
+    const box = el("div", "fb " + (s.correct ? "ok" : "bad"));
+    const praise = ["Harika, tam isabet.", "Doğru! Mantığını da kurdunuz.", "Evet, bu kadar.", "Çok iyi, devam.", "Tam olarak bu."];
+    const encourage = ["Bu seferlik olmadı, açıklamaya bir göz atalım.", "Yaklaştınız, ama ayrıntı kaçtı.", "Sorun değil; tam da bunun için çalışıyoruz.", "Bu tuzağa çok kişi düşer, birlikte bakalım."];
+    const pool = s.correct ? praise : encourage;
+    box.appendChild(el("h3", null, (s.correct ? `✓ ${pool[q.no % pool.length]} +${q.points} puan` : `✗ ${pool[q.no % pool.length]}`)));
+    const ans = el("p"); ans.appendChild(el("span", "lbl", "Doğru cevap: ")); ans.appendChild(document.createTextNode(answerText(q))); box.appendChild(ans);
+    if (q.type === "MC" && !s.correct && s.pick != null && q.distractors[L[s.pick]]) {
+      const w = el("div", "why"); w.appendChild(el("span", "lbl", `Neden ${L[s.pick]} değil? `)); w.appendChild(document.createTextNode(q.distractors[L[s.pick]])); box.appendChild(w);
+    }
+    const sol = el("p"); sol.appendChild(el("span", "lbl", "Çözüm: ")); sol.appendChild(document.createTextNode(q.sol)); box.appendChild(sol);
+    if (q.type === "MC") {
+      const d = el("details"); const sm = el("summary", null, "Tüm çeldiricilerin analizi"); sm.style.cursor = "pointer"; sm.style.fontWeight = "700"; d.appendChild(sm);
+      const ul = el("ul"); Object.keys(q.distractors).sort().forEach(k => { const li = el("li"); li.appendChild(el("b", null, k + ") ")); li.appendChild(document.createTextNode(q.distractors[k])); ul.appendChild(li); }); d.appendChild(ul); box.appendChild(d);
+    }
+    const ln = el("p"); ln.appendChild(el("span", "lbl", "Bağlantı: ")); ln.appendChild(document.createTextNode(q.link)); box.appendChild(ln);
+    box.appendChild(el("p", "kaz", "Kazanım: " + q.kaz));
+    return box;
+  }
+
+  function answerText(q){
+    if (q.type === "MC") return `${L[q.answer]}) ${q.options[q.answer]}`;
+    if (q.type === "DY") return q.ans ? "Doğru" : "Yanlış";
+    if (q.type === "KC") return `${q.ans} (kabul edilen yazımlar: ${q.acceptShow})`;
+    return Object.entries(q.key).map(([k, v]) => `${k}-${v}`).join(", ");
+  }
+
+  function renderQuestion(){
+    const q = Q[cur], s = state[cur], card = $("#card"); card.innerHTML = "";
+    const bd = el("div", "badges");
+    bd.appendChild(el("span", "badge t", `Tema ${q.theme} • ${q.themeName}`));
+    bd.appendChild(el("span", "badge", `${TN[q.type]} • ${q.points} puan`));
+    bd.appendChild(el("span", "badge", q.level));
+    card.appendChild(bd);
+    card.appendChild(el("div", "qno", `Soru ${q.no} / ${Q.length}`));
+    const qt = el("div", "qtext"); richText(qt, q.q); card.appendChild(qt);
+
+    if (q.type === "MC") {
+      const box = el("div", "opts");
+      q.options.forEach((o, i) => {
+        const b = el("button", "opt"); b.appendChild(el("span", "k", L[i])); b.appendChild(el("span", null, o));
+        if (s.done) { b.disabled = true; if (i === q.answer) b.classList.add("ok"); else if (i === s.pick) b.classList.add("bad"); else b.classList.add("dim"); }
+        b.onclick = () => { if (s.done) return; s.pick = i; finish(cur, i === q.answer); };
+        box.appendChild(b);
+      });
+      card.appendChild(box);
+    }
+    if (q.type === "DY") {
+      const box = el("div", "tf");
+      [[true, "Doğru"], [false, "Yanlış"]].forEach(([v, t]) => {
+        const b = el("button", "opt", t);
+        if (s.done) { b.disabled = true; if (v === q.ans) b.classList.add("ok"); else if (v === s.pick) b.classList.add("bad"); else b.classList.add("dim"); }
+        b.onclick = () => { if (s.done) return; s.pick = v; finish(cur, v === q.ans); };
+        box.appendChild(b);
+      });
+      card.appendChild(box);
+    }
+    if (q.type === "KC") {
+      const box = el("div", "kc");
+      const inp = el("input"); inp.type = "text"; inp.placeholder = "Cevabınızı yazın…"; inp.value = s.text; inp.autocomplete = "off"; inp.setAttribute("aria-label", "Kısa cevap");
+      const btn = el("button", "btn", "Kontrol et");
+      const check = () => { if (s.done) return; const v = inp.value.trim(); if (!v) { inp.focus(); return; } s.text = v;
+        const okSet = new Set([q.ans, ...q.accept].map(squash)); finish(cur, okSet.has(squash(v))); };
+      inp.addEventListener("input", () => { s.text = inp.value; });
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") check(); e.stopPropagation(); });
+      btn.onclick = check;
+      if (s.done) { inp.disabled = true; btn.disabled = true; inp.classList.add(s.correct ? "ok" : "bad"); }
+      box.appendChild(inp); box.appendChild(btn); card.appendChild(box);
+    }
+    if (q.type === "ES") renderMatch(q, s, card);
+    if (s.done) card.appendChild(feedback(q, s));
+  }
+
+  function renderMatch(q, s, card){
+    const wrap = el("div", "match");
+    const left = el("div", "col"), right = el("div", "col");
+    left.appendChild(el("div", "coltitle", "Kavramlar"));
+    right.appendChild(el("div", "coltitle", "Açıklamalar"));
+    const usedRight = {}; Object.entries(s.pairs).forEach(([li, ri]) => usedRight[ri] = Number(li));
+    q.items.forEach((it, i) => {
+      const b = el("button", "mi"); const tag = el("span", "tag", String(i + 1)); b.appendChild(tag); b.appendChild(el("span", null, it[0]));
+      if (s.pairs[i] != null) { b.classList.add("paired"); tag.style.background = PAIR_COLORS[i]; }
+      if (s.selLeft === i) b.classList.add("sel");
+      if (s.done) { b.disabled = true; b.classList.add(q.key[String(i + 1)] === "abcde"[s.pairs[i]] ? "ok" : "bad"); }
+      b.onclick = () => { if (s.done) return; if (s.pairs[i] != null) { delete s.pairs[i]; s.selLeft = i; } else s.selLeft = (s.selLeft === i ? null : i); renderQuestion(); };
+      left.appendChild(b);
+    });
+    q.right.forEach((t, j) => {
+      const b = el("button", "mi"); const owner = usedRight[j]; const tag = el("span", "tag", owner != null ? String(owner + 1) : "abcde"[j]);
+      if (owner != null) { b.classList.add("paired"); tag.style.background = PAIR_COLORS[owner]; }
+      b.appendChild(tag); const tx = el("span"); tx.appendChild(el("b", null, "abcde"[j] + ") ")); tx.appendChild(document.createTextNode(t)); b.appendChild(tx);
+      if (s.done) b.disabled = true;
+      b.onclick = () => { if (s.done) return;
+        if (s.selLeft == null) { if (owner != null) { delete s.pairs[owner]; renderQuestion(); } return; }
+        if (owner != null) delete s.pairs[owner];
+        s.pairs[s.selLeft] = j; s.selLeft = null; renderQuestion(); };
+      right.appendChild(b);
+    });
+    wrap.appendChild(left); wrap.appendChild(right); card.appendChild(wrap);
+    if (!s.done) {
+      const n = Object.keys(s.pairs).length;
+      card.appendChild(el("p", "hint", n < 5 ? `Önce soldan bir kavrama, sonra sağdan açıklamasına dokunun. ${n}/5 eşleşme yapıldı. Bir eşleşmeyi bozmak için kavrama yeniden dokunun.` : "Beş eşleşme tamam. Emin olduğunuzda kontrol edin."));
+      const row = el("div", "center"); row.style.marginTop = "12px";
+      const btn = el("button", "btn", "Eşleştirmeyi kontrol et"); btn.disabled = n < 5;
+      btn.onclick = () => { const ok = q.items.every((_, i) => q.key[String(i + 1)] === "abcde"[s.pairs[i]]); finish(cur, ok); };
+      const rs = el("button", "btn ghost", "Temizle"); rs.onclick = () => { s.pairs = {}; s.selLeft = null; renderQuestion(); };
+      row.appendChild(rs); row.appendChild(btn); card.appendChild(row);
+    } else {
+      const n = q.items.filter((_, i) => q.key[String(i + 1)] === "abcde"[s.pairs[i]]).length;
+      if (!s.correct) card.appendChild(el("p", "hint", `${n}/5 eşleşme doğru. Kılavuz kısmi puan vermediği için bu soru 0 puan getirdi; doğru eşleşmeler aşağıda.`));
+    }
+  }
+
+  function go(i){ cur = Math.max(0, Math.min(Q.length - 1, i)); renderQuestion(); renderDots(); window.scrollTo({top: 0, behavior: "smooth"}); }
+
+  function show(id){ ["start", "quiz", "result"].forEach(x => $("#" + x).classList.toggle("hidden", x !== id)); $("#nav").classList.toggle("hidden", id !== "quiz"); }
+
+  function results(){
+    const sc = score(), nOk = state.filter(s => s.correct).length, blank = state.filter(s => !s.done).length;
+    const r = $("#result"); r.innerHTML = "";
+    const c1 = el("div", "card"); c1.style.textAlign = "center";
+    c1.appendChild(el("div", "qno", "Atölye sonucu"));
+    const ring = el("div", "ring"); ring.style.setProperty("--p", sc); const inner = el("div");
+    const big = el("div", "big", String(sc)); inner.appendChild(big); inner.appendChild(el("small", null, "100 puan üzerinden")); ring.appendChild(inner); c1.appendChild(ring);
+    c1.appendChild(el("p", "msg", `Başarı yüzdesi: %${sc} • ${nOk} doğru, ${20 - nOk - blank} yanlış, ${blank} boş`));
+    const m = sc >= 85 ? "İl birinciliğine yakışan bir sonuç. Şimdi yanlışlarınızdaki küçük ayrıntılara odaklanın." :
+              sc >= 65 ? "Sağlam bir temel var. Kırmızı işaretli temaların çözümlerini bir kez daha okuyun, fark hemen görünecek." :
+              sc >= 40 ? "Yolun yarısındasınız. Çözüm açıklamaları tam da bu aşama için yazıldı; acele etmeden üzerinden geçin." :
+                         "Her uzman bir yerden başladı. Önce kavramları oturtalım: çözümleri okuyup atölyeyi yeniden deneyin.";
+    c1.appendChild(el("p", "msg", m));
+    if (blank) c1.appendChild(el("p", "hint", "Hatırlatma: Yarışmada boş bırakılan soru puan getirmez, yanlış da puan götürmez. Her soruyu işaretleyin."));
+    const row = el("div", "center");
+    const firstWrong = state.findIndex(s => !s.correct);
+    if (firstWrong >= 0) { const b = el("button", "btn ghost", "Yanlışları incele"); b.onclick = () => { show("quiz"); go(firstWrong); }; row.appendChild(b); }
+    const rb = el("button", "btn", "Yeniden başlat"); rb.onclick = () => { state = fresh(); cur = 0; show("quiz"); go(0); }; row.appendChild(rb);
+    c1.appendChild(row); r.appendChild(c1);
+
+    const c2 = el("div", "card"); c2.appendChild(el("h2", "sec", "Soru türlerine göre puan"));
+    const tb = el("table"); const thead = el("tr"); ["Soru türü", "Doğru", "Alınan", "En fazla"].forEach(h => thead.appendChild(el("th", null, h))); tb.appendChild(thead);
+    ["ES", "KC", "MC", "DY"].forEach(t => { const idx = Q.map((q, i) => i).filter(i => Q[i].type === t);
+      const tr = el("tr"); tr.appendChild(el("td", null, TN[t])); tr.appendChild(el("td", "n", `${idx.filter(i => state[i].correct).length}/${idx.length}`));
+      tr.appendChild(el("td", "n", String(idx.reduce((a, i) => a + state[i].pts, 0)))); tr.appendChild(el("td", "n", String(idx.length * Q[idx[0]].points))); tb.appendChild(tr); });
+    c2.appendChild(tb); r.appendChild(c2);
+
+    const c3 = el("div", "card"); c3.appendChild(el("h2", "sec", "Temalara göre durum (soruya gitmek için dokunun)"));
+    const g = el("div", "themes");
+    DATA.themes.forEach((name, ti) => { const box = el("div", "th"); box.appendChild(el("span", null, `${ti + 1}. ${name}`)); const mm = el("div", "m");
+      Q.forEach((q, i) => { if (q.theme !== ti + 1) return; const s = state[i]; const b = el("button", s.done ? (s.correct ? "ok" : "bad") : "na", String(i + 1)); b.onclick = () => { show("quiz"); go(i); }; mm.appendChild(b); });
+      box.appendChild(mm); g.appendChild(box); });
+    c3.appendChild(g); r.appendChild(c3);
+    show("result"); window.scrollTo({top: 0});
+  }
+
+  // olaylar
+  $("#go").onclick = () => { show("quiz"); go(0); };
+  $("#prev").onclick = () => go(cur - 1);
+  $("#next").onclick = () => { if (cur === Q.length - 1) results(); else go(cur + 1); };
+  let fs = 18; const setFs = v => { fs = Math.max(14, Math.min(28, v)); document.documentElement.style.setProperty("--fs", fs + "px"); };
+  $("#fsUp").onclick = () => setFs(fs + 2); $("#fsDown").onclick = () => setFs(fs - 2);
+  $("#themeBtn").onclick = () => { const root = document.documentElement; const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; root.dataset.theme = dark ? "light" : "dark"; };
+  document.addEventListener("keydown", e => {
+    if ($("#quiz").classList.contains("hidden")) return;
+    if (e.target.tagName === "INPUT") return;
+    if (e.key === "ArrowRight") $("#next").click();
+    else if (e.key === "ArrowLeft" && cur > 0) go(cur - 1);
+    else { const q = Q[cur]; const k = e.key.toUpperCase(); const map = {"1":0,"2":1,"3":2,"4":3,"A":0,"B":1,"C":2,"D":3};
+      if (q.type === "MC" && k in map) { const b = document.querySelectorAll("#card .opt")[map[k]]; if (b && !b.disabled) b.click(); }
+      if (q.type === "DY" && (k === "D" || k === "1")) document.querySelectorAll("#card .opt")[0].click();
+      if (q.type === "DY" && (k === "Y" || k === "2")) document.querySelectorAll("#card .opt")[1].click(); }
+  });
+  state = fresh();
+})();
+</script>
+</body>
+</html>
